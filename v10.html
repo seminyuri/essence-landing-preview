@@ -1928,39 +1928,147 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 8px); }
   .tc-arrow { transform: rotate(90deg); font-size: 18px; }
 }
 
-/* Source citation — mono micro-print under each step (научная атрибуция) */
-.transmission-steps .step-source {
-  display: block;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 0.5px dashed var(--line-soft);
+/* ─── Footnote-style citations: hidden by default, click to reveal ─── */
+
+/* Section-level hint that ¹²³⁴⁵ are interactive */
+.cite-hint {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 18px;
   font-family: var(--font-mono);
-  line-height: 1.6;
-}
-.transmission-steps .step-source-cite {
-  display: block;
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--fg-muted);
   font-weight: 500;
+  line-height: 1.5;
 }
-.transmission-steps .step-source-cite::before {
-  content: '↳';
-  display: inline-block;
-  margin-right: 8px;
+.cite-hint::before {
+  content: '✦';
   color: var(--accent);
-  opacity: 0.85;
-  letter-spacing: 0;
+  font-size: 1.15em;
+  opacity: 0.9;
+  line-height: 1;
 }
-.transmission-steps .step-source-detail {
+.cite-hint .nums {
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  font-size: 1em;
+}
+
+/* Superscript cite trigger button */
+.step-cite-num {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  vertical-align: super;
+  line-height: 1;
+  position: relative;
+  opacity: 0.78;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.step-cite-num sup {
+  display: inline-block;
+  font-size: 0.52em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 1px 4px 2px;
+  border-bottom: 1px dotted color-mix(in oklch, var(--accent) 55%, transparent);
+  border-radius: 2px;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.step-cite-num:hover,
+.step-cite-num:focus-visible {
+  opacity: 1;
+  transform: translateY(-1.5px);
+}
+.step-cite-num:hover sup,
+.step-cite-num:focus-visible sup {
+  border-bottom-color: var(--accent);
+  background: color-mix(in oklch, var(--accent) 8%, transparent);
+}
+.step-cite-num:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.step-cite-num[aria-expanded="true"] {
+  opacity: 1;
+}
+.step-cite-num[aria-expanded="true"] sup {
+  background: var(--accent);
+  color: var(--btn-fg);
+  border-bottom-color: var(--accent);
+}
+
+/* Pulse — one-time hint that ¹²³⁴⁵ are interactive */
+@keyframes cite-pulse-glow {
+  0%, 100% { transform: scale(1) translateY(0); opacity: 0.78; }
+  30%      { transform: scale(1.35) translateY(-2px); opacity: 1; }
+  60%      { transform: scale(1) translateY(0); opacity: 1; }
+}
+.step-cite-num.is-pulsing { animation: cite-pulse-glow 1.6s var(--ease) 2.5; }
+.step-cite-num.is-pulsing sup {
+  background: color-mix(in oklch, var(--accent) 18%, transparent);
+  border-bottom-color: var(--accent);
+  box-shadow: 0 0 0 0 var(--glow);
+  animation: cite-ring-glow 1.6s var(--ease) 2.5;
+}
+@keyframes cite-ring-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--glow); }
+  30%      { box-shadow: 0 0 0 6px transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-cite-num.is-pulsing,
+  .step-cite-num.is-pulsing sup { animation: none !important; }
+}
+
+/* Hidden citation block — reveals smoothly on click */
+.step-cite {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.5s var(--ease), opacity 0.45s var(--ease);
+  margin-top: 0;
+}
+.step.is-cite-open .step-cite {
+  max-height: 320px;
+  opacity: 1;
+}
+.step-cite-inner {
+  margin-top: 14px;
+  padding: 14px 16px 14px 18px;
+  border-left: 2px solid var(--accent);
+  background: color-mix(in oklch, var(--accent) 4%, transparent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  position: relative;
+}
+.step-cite-cite {
   display: block;
-  margin-top: 4px;
-  padding-left: 18px;
+  font-family: var(--font-mono);
   font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: none;
-  color: var(--fg-faint);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg);
+  font-weight: 500;
+  line-height: 1.6;
+}
+.step-cite-detail {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 14.5px;
+  color: var(--fg-body);
+  line-height: 1.55;
   font-feature-settings: 'tnum' 1, 'lnum' 1;
 }
 
@@ -5223,7 +5331,8 @@ body.ex-modal-locked { overflow: hidden; }
 <section id="s04-transmission" class="section section--transmission" aria-labelledby="s04-h">
   <span class="section-num mono">04 — погрешность передачи</span>
   <h2 id="s04-h" class="section-h" data-reveal><span data-text-key="s04_h2_a">Почему обычные способы понять человека дают</span> <em>менее точный</em> результат</h2>
-  <p class="section-body" data-reveal data-reveal-delay="1">Представь обычную работу с психологом или другим помогающим специалистом. Чтобы он составил картину тебя, информация проходит через несколько звеньев — и на каждом неизбежно теряется в точности. Это не про плохого специалиста — это про устройство любого человеческого канала. Каждое звено ниже — известный исследованный когнитивный феномен.</p>
+  <p class="section-body" data-reveal data-reveal-delay="1">Представь обычную работу с психологом или другим помогающим специалистом. Чтобы он составил картину тебя, информация проходит через несколько звеньев — и на каждом неизбежно теряется в точности. Это не про плохого специалиста — это про устройство любого человеческого канала.</p>
+  <p class="cite-hint" data-reveal data-reveal-delay="2">Маленькие <span class="nums">¹²³⁴⁵</span> рядом с заголовком&nbsp;— нажми, чтобы увидеть исследование</p>
 
   <div class="transmission-degradation" data-reveal aria-hidden="true">
     <svg class="degradation-svg" viewBox="0 0 600 170" preserveAspectRatio="xMidYMid meet">
@@ -5292,10 +5401,9 @@ body.ex-modal-locked { overflow: hidden; }
           <text x="420" y="146" opacity="0.5">ОН ГОВОРИТ</text>
           <text x="540" y="146" opacity="0.42">ТЫ <tspan data-gx-fem="ПОНЯЛА" data-gx-masc="ПОНЯЛ">ПОНЯЛА</tspan></text>
         </g>
-        <!-- Source attribution above the chain (replaces fabricated %) -->
+        <!-- Top label — hint that each step is researched -->
         <g font-family="'JetBrains Mono', monospace" font-size="8" letter-spacing="0.18em" fill="currentColor" text-anchor="middle" opacity="0.55">
-          <text x="300" y="22">КАЖДОЕ ЗВЕНО — ИССЛЕДОВАННЫЙ ФЕНОМЕН</text>
-          <text x="300" y="36" opacity="0.7" letter-spacing="0.1em" font-size="7.5">EBBINGHAUS · NICHOLS · BARTLETT · NISBETT &amp; WILSON · KESSELS</text>
+          <text x="300" y="28">КАЖДОЕ ЗВЕНО — ИССЛЕДОВАННЫЙ ФЕНОМЕН</text>
         </g>
       </g>
     </svg>
@@ -5304,48 +5412,58 @@ body.ex-modal-locked { overflow: hidden; }
   <ol class="transmission-steps">
     <li class="step" data-reveal>
       <span class="step-num mono">01</span>
-      <h3><strong>ТЫ</strong> говоришь то, что замечаешь</h3>
+      <h3><strong>ТЫ</strong> говоришь то, что замечаешь<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-01" aria-label="Показать исследование для шага 1"><sup>¹</sup></button></h3>
       <p>Иногда мягче, чем есть на самом деле. Иногда строже к себе, чем стоило бы. Что-то забывается само собой, что-то не приходит в голову прямо сейчас, настроение тоже играет свою роль.</p>
-      <footer class="step-source">
-        <span class="step-source-cite">Nisbett &amp; Wilson · Telling More Than We Can Know · Psychological Review, 1977</span>
-        <span class="step-source-detail">У человека нет полного доступа к собственным мотивам — отчёты часто достраиваются по ходу рассказа.</span>
-      </footer>
+      <aside id="cite-01" class="step-cite" role="note">
+        <div class="step-cite-inner">
+          <span class="step-cite-cite">Nisbett &amp; Wilson · Telling More Than We Can Know · Psychological Review, 1977</span>
+          <span class="step-cite-detail">У человека нет полного доступа к собственным мотивам — отчёты часто достраиваются по ходу рассказа, а не наблюдаются напрямую.</span>
+        </div>
+      </aside>
     </li>
     <li class="step" data-reveal data-reveal-delay="1">
       <span class="step-num mono">02</span>
-      <h3><strong>СПЕЦИАЛИСТ</strong> слышит то, что услышал</h3>
+      <h3><strong>СПЕЦИАЛИСТ</strong> слышит то, что услышал<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-02" aria-label="Показать исследование для шага 2"><sup>²</sup></button></h3>
       <p>Слышим мы все по-своему. Что-то ловится ярче, что-то проходит фоном — это нормально и неизбежно. Слова и интонации — не точные приборы.</p>
-      <footer class="step-source">
-        <span class="step-source-cite">Nichols &amp; Stevens · Are You Listening? · McGraw-Hill, 1957</span>
-        <span class="step-source-detail">Средняя эффективность слушания у взрослого ≈ 25% — устойчивый показатель когнитивной нагрузки.</span>
-      </footer>
+      <aside id="cite-02" class="step-cite" role="note">
+        <div class="step-cite-inner">
+          <span class="step-cite-cite">Nichols &amp; Stevens · Are You Listening? · McGraw-Hill, 1957</span>
+          <span class="step-cite-detail">Средняя эффективность слушания у взрослого ≈ 25% — устойчивый показатель когнитивной нагрузки.</span>
+        </div>
+      </aside>
     </li>
     <li class="step" data-reveal data-reveal-delay="2">
       <span class="step-num mono">03</span>
-      <h3><strong>ОН</strong> переводит услышанное в свою рамку</h3>
+      <h3><strong>ОН</strong> переводит услышанное в свою рамку<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-03" aria-label="Показать исследование для шага 3"><sup>³</sup></button></h3>
       <p>В ту психологическую школу, в тот метод, в ту систему понимания, которая ему близка. Каждая школа — это набор линз, через которые видно одно и не видно другое.</p>
-      <footer class="step-source">
-        <span class="step-source-cite">Bartlett · Remembering: A Study in Experimental and Social Psychology · Cambridge UP, 1932</span>
-        <span class="step-source-detail">Schema-driven processing — память достраивает услышанное под имеющиеся рамки. Это устройство восприятия, не предвзятость.</span>
-      </footer>
+      <aside id="cite-03" class="step-cite" role="note">
+        <div class="step-cite-inner">
+          <span class="step-cite-cite">Bartlett · Remembering: A Study in Experimental and Social Psychology · Cambridge UP, 1932</span>
+          <span class="step-cite-detail">Schema-driven processing — память достраивает услышанное под имеющиеся рамки. Это устройство восприятия, не предвзятость.</span>
+        </div>
+      </aside>
     </li>
     <li class="step" data-reveal data-reveal-delay="3">
       <span class="step-num mono">04</span>
-      <h3><strong>ОН</strong> подбирает слова, чтобы передать тебе</h3>
+      <h3><strong>ОН</strong> подбирает слова, чтобы передать тебе<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-04" aria-label="Показать исследование для шага 4"><sup>⁴</sup></button></h3>
       <p>То, что он понял из услышанного. Снова — фильтр. Слова, которые звучат привычно для него, могут не совпадать с тем, как ты на самом деле <span data-gx-fem="устроена" data-gx-masc="устроен">устроена</span>.</p>
-      <footer class="step-source">
-        <span class="step-source-cite">Brennan &amp; Clark · Conceptual Pacts in Conversation · Journal of Experimental Psychology, 1996</span>
-        <span class="step-source-detail">Понятийные словари специалиста и клиента не совпадают — перевод неизбежно срезает нюансы.</span>
-      </footer>
+      <aside id="cite-04" class="step-cite" role="note">
+        <div class="step-cite-inner">
+          <span class="step-cite-cite">Brennan &amp; Clark · Conceptual Pacts in Conversation · Journal of Experimental Psychology, 1996</span>
+          <span class="step-cite-detail">Понятийные словари специалиста и клиента не совпадают — перевод неизбежно срезает нюансы.</span>
+        </div>
+      </aside>
     </li>
     <li class="step" data-reveal>
       <span class="step-num mono">05</span>
-      <h3><strong>ТЫ</strong> слышишь и интерпретируешь</h3>
+      <h3><strong>ТЫ</strong> слышишь и интерпретируешь<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-05" aria-label="Показать исследование для шага 5"><sup>⁵</sup></button></h3>
       <p>Через свои фильтры, через своё текущее состояние, через то, что для тебя <span data-gx-fem="готова" data-gx-masc="готов">готова</span> сейчас услышать.</p>
-      <footer class="step-source">
-        <span class="step-source-cite">Kessels · Patients' Memory for Medical Information · Journal of the Royal Society of Medicine, 2003</span>
-        <span class="step-source-detail">Из медицинской консультации сохраняется 40–80% содержания. Из запомненного — около половины с искажением.</span>
-      </footer>
+      <aside id="cite-05" class="step-cite" role="note">
+        <div class="step-cite-inner">
+          <span class="step-cite-cite">Kessels · Patients' Memory for Medical Information · Journal of the Royal Society of Medicine, 2003</span>
+          <span class="step-cite-detail">Из медицинской консультации сохраняется 40–80% содержания. Из запомненного — около половины с искажением.</span>
+        </div>
+      </aside>
     </li>
   </ol>
 
@@ -7980,6 +8098,47 @@ body.ex-modal-locked { overflow: hidden; }
   };
 
   // ────────────────────────────────────────────
+  // CITATIONS — toggle per-step научный источник + pulse hint
+  // ────────────────────────────────────────────
+  const Citations = {
+    init() {
+      const steps = document.querySelectorAll('#s04-transmission .step');
+      if (!steps.length) return;
+
+      steps.forEach((step) => {
+        const btn = step.querySelector('.step-cite-num');
+        if (!btn) return;
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const open = step.classList.toggle('is-cite-open');
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          // первый клик — гасим pulse навсегда
+          document.querySelectorAll('#s04-transmission .step-cite-num.is-pulsing')
+            .forEach((b) => b.classList.remove('is-pulsing'));
+        });
+      });
+
+      // Pulse-hint на первой ¹ при появлении секции в viewport (один раз за сессию)
+      const FLAG = 'essence-cite-pulsed';
+      if (sessionStorage.getItem(FLAG)) return;
+      const firstBtn = steps[0]?.querySelector('.step-cite-num');
+      if (!firstBtn || !('IntersectionObserver' in window)) return;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) return;
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => firstBtn.classList.add('is-pulsing'), 600);
+            sessionStorage.setItem(FLAG, '1');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.45 });
+      observer.observe(steps[0]);
+    },
+  };
+
+  // ────────────────────────────────────────────
   // INIT
   // ────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
@@ -7997,6 +8156,7 @@ body.ex-modal-locked { overflow: hidden; }
     DocModal.init();
     NumberTicker.init();
     TeamPhotos.init();
+    Citations.init();
     Rotator.start();
   });
 })();
