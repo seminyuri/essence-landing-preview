@@ -1848,15 +1848,143 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 8px); }
   .tc-flow--clean * { animation: none !important; }
 }
 
+/* Pipeline-style scroll layout: viz LEFT (sticky), text RIGHT */
+.transmission-scroll {
+  padding: var(--gap-sec) var(--edge);
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+.transmission-grid { display: grid; gap: 48px; }
+
+/* === Sticky canvas (desktop only) === */
+.transmission-canvas-wrap { display: none; }
+.transmission-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1;
+  color: var(--accent);
+}
+.t-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.8s var(--ease), transform 1.2s var(--ease);
+  pointer-events: none;
+  overflow: visible;
+}
+#s04-transmission[data-stage="0"] .t-stage[data-i="0"],
+#s04-transmission[data-stage="1"] .t-stage[data-i="1"],
+#s04-transmission[data-stage="2"] .t-stage[data-i="2"],
+#s04-transmission[data-stage="3"] .t-stage[data-i="3"],
+#s04-transmission[data-stage="4"] .t-stage[data-i="4"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Common typography for stage SVGs */
+.t-stage .t-stage-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  fill: var(--fg-muted);
+  opacity: 0.85;
+}
+.t-stage .t-stage-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
+  fill: var(--fg-faint);
+  font-style: italic;
+}
+.t-stage .t-stage-pct {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+  fill: currentColor;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+.t-stage .t-stage-word {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-size: 19px;
+  fill: currentColor;
+  font-weight: 500;
+}
+.t-stage .t-stage-word--partial { opacity: 0.65; }
+
+/* === Stage 0 — orbital field rotations === */
+.t-stage[data-i="0"] .t0-orbit-outer { transform-origin: 0 0; animation: t-rot 70s linear infinite; }
+.t-stage[data-i="0"] .t0-orbit-mid   { transform-origin: 0 0; animation: t-rot-rev 50s linear infinite; }
+.t-stage[data-i="0"] .t0-orbit-inner { transform-origin: 0 0; animation: t-rot 36s linear infinite; }
+@keyframes t-rot     { to { transform: rotate(360deg); } }
+@keyframes t-rot-rev { to { transform: rotate(-360deg); } }
+
+/* === Stage 1 — sieve / drop === */
+.t-stage[data-i="1"] .t1-stream  > * { animation: t-drop 2.6s var(--ease) infinite; }
+.t-stage[data-i="1"] .t1-stream  > *:nth-child(2n)   { animation-delay: 0.2s; }
+.t-stage[data-i="1"] .t1-stream  > *:nth-child(3n)   { animation-delay: 0.4s; }
+.t-stage[data-i="1"] .t1-stream  > *:nth-child(4n)   { animation-delay: 0.6s; }
+.t-stage[data-i="1"] .t1-passed > *  { animation: t-rise-fade 3s var(--ease) infinite; }
+.t-stage[data-i="1"] .t1-passed > *:nth-child(2)     { animation-delay: 0.5s; }
+.t-stage[data-i="1"] .t1-passed > *:nth-child(3)     { animation-delay: 1s; }
+@keyframes t-drop {
+  0%   { transform: translateY(-12px); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(0);   opacity: 1; }
+}
+@keyframes t-rise-fade {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* === Stage 2 — snap dots pulsing === */
+.t-stage[data-i="2"] .t2-snap-1,
+.step-mobile-viz .t2-snap-1 { animation: t-pulse 2.4s var(--ease) infinite; transform-origin: center; transform-box: fill-box; }
+.t-stage[data-i="2"] .t2-snap-2 { animation: t-pulse 2.4s var(--ease) 0.4s infinite; transform-origin: center; transform-box: fill-box; }
+.t-stage[data-i="2"] .t2-snap-3 { animation: t-pulse 2.4s var(--ease) 0.8s infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes t-pulse {
+  0%, 100% { opacity: 0.95; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+
+/* === Stage 3 — selected slot pulsing === */
+.t-stage[data-i="3"] .t3-selected,
+.step-mobile-viz .t3-selected { animation: t-glow 2s var(--ease) infinite; }
+@keyframes t-glow {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 0.55; }
+}
+
+/* === Stage 4 — wavy membrane === */
+.t-stage[data-i="4"] .t4-wave-1,
+.step-mobile-viz .t4-wave-1 { animation: t-wave 5.4s ease-in-out infinite; transform-origin: center; }
+.t-stage[data-i="4"] .t4-wave-2,
+.step-mobile-viz .t4-wave-2 { animation: t-wave 6s   ease-in-out 0.3s infinite; transform-origin: center; }
+.t-stage[data-i="4"] .t4-wave-3 { animation: t-wave 6.6s ease-in-out 0.6s infinite; transform-origin: center; }
+@keyframes t-wave {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-stage *, .step-mobile-viz * { animation: none !important; }
+}
+
+/* === Steps (right column) === */
 .transmission-steps {
   list-style: none;
   display: flex; flex-direction: column;
   gap: 0;
-  margin: 48px 0;
-  max-width: 70ch;
+  margin: 32px 0 48px;
   position: relative;
 }
-/* Vertical thread connecting all 5 steps */
 .transmission-steps::before {
   content: '';
   position: absolute;
@@ -1875,26 +2003,33 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 8px); }
   position: relative;
   padding: 38px 0 32px 56px;
   border-top: 0.5px solid var(--line-soft);
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
-  align-items: start;
 }
-.transmission-steps .step:first-child { border-top: 0; padding-top: 16px; }
+.transmission-steps .step:first-child { border-top: 0; padding-top: 20px; }
 .transmission-steps .step::before {
   content: '';
   position: absolute;
   left: 6px;
-  top: 42px;
+  top: 46px;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: var(--bg);
   border: 1.5px solid var(--accent);
   box-shadow: 0 0 0 4px var(--bg);
+  transition: background 0.4s var(--ease), transform 0.4s var(--ease);
   z-index: 2;
 }
-.transmission-steps .step:first-child::before { top: 22px; }
+.transmission-steps .step:first-child::before { top: 28px; }
+/* Active step (matches sticky canvas stage) — filled marker */
+#s04-transmission[data-stage="0"] .step[data-stage-i="0"]::before,
+#s04-transmission[data-stage="1"] .step[data-stage-i="1"]::before,
+#s04-transmission[data-stage="2"] .step[data-stage-i="2"]::before,
+#s04-transmission[data-stage="3"] .step[data-stage-i="3"]::before,
+#s04-transmission[data-stage="4"] .step[data-stage-i="4"]::before {
+  background: var(--accent);
+  transform: scale(1.15);
+}
+
 .transmission-steps .step-num {
   display: block;
   font-family: var(--font-mono);
@@ -1926,96 +2061,54 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 8px); }
 }
 .transmission-steps .step p { font-size: 15px; line-height: var(--lh-body); color: var(--fg-body); }
 
-/* Per-step SVG visualization — «твой портрет» на этом этапе */
-.step-viz {
-  width: 100%;
-  max-width: 220px;
-  aspect-ratio: 1;
-  margin-top: 4px;
-  position: relative;
-  color: var(--accent);
-}
-.step-viz svg {
-  width: 100%;
-  height: 100%;
+/* Mobile-only inline mini-svg for each step (replaces sticky canvas on small screens) */
+.step-mobile-viz {
   display: block;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+  margin: 0 0 20px;
+  color: var(--accent);
   overflow: visible;
 }
-.step-viz-caption {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+.step-mobile-viz .t-stage-tag,
+.step-mobile-viz .t-stage-num,
+.step-mobile-viz .t-stage-pct,
+.step-mobile-viz .t-stage-word {
   font-family: var(--font-mono);
-  font-size: 9px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--fg-faint);
-  white-space: nowrap;
-  text-align: center;
 }
-.step-viz .viz-pct {
-  font-feature-settings: 'tnum' 1, 'lnum' 1;
-  color: var(--accent);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
+.step-mobile-viz .t-stage-tag { font-size: 9px; fill: var(--fg-muted); }
+.step-mobile-viz .t-stage-num { font-size: 9px; fill: var(--fg-faint); text-transform: lowercase; font-style: italic; letter-spacing: 0.14em; }
+.step-mobile-viz .t-stage-pct { font-size: 14px; fill: currentColor; font-weight: 600; font-feature-settings: 'tnum' 1, 'lnum' 1; }
+.step-mobile-viz .t-stage-word { font-family: var(--font-italic); font-style: italic; font-size: 12px; fill: currentColor; text-transform: none; letter-spacing: 0; }
+.step-mobile-viz .t-stage-word--partial { opacity: 0.65; }
 
-/* Activate animation only when step enters viewport */
-.step.is-visible .step-viz svg .anim-fade,
-.step[data-reveal].is-visible .step-viz svg .anim-fade {
-  animation: viz-fade-in 1.2s var(--ease) both;
-}
+/* Animations on mobile mini-svg (orbital, sieve, etc.) */
+.step-mobile-viz .t0-orbit-outer { transform-origin: 110px 100px; animation: t-rot 70s linear infinite; }
+.step-mobile-viz .t0-orbit-mid   { transform-origin: 110px 100px; animation: t-rot-rev 50s linear infinite; }
 
-@keyframes viz-fade-in {
-  from { opacity: 0; transform: scale(0.94); }
-  to   { opacity: var(--target-opacity, 1); transform: scale(1); }
-}
-
-@keyframes viz-pulse {
-  0%, 100% { opacity: var(--target-opacity, 0.95); }
-  50%      { opacity: calc(var(--target-opacity, 0.95) * 0.65); }
-}
-
-@keyframes viz-slow-rotate {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes viz-drift-down {
-  0%   { transform: translateY(-2px); opacity: 0; }
-  20%  { opacity: 1; }
-  80%  { opacity: 1; }
-  100% { transform: translateY(60px); opacity: 0; }
-}
-
-@keyframes viz-shake {
-  0%, 100% { transform: translateX(0); }
-  25%      { transform: translateX(-1px); }
-  75%      { transform: translateX(1px); }
-}
-
-/* Desktop layout — text left, viz right */
-@media (min-width: 768px) {
-  .transmission-steps .step {
-    grid-template-columns: 1fr 200px;
-    gap: 36px;
-    padding-right: 8px;
-  }
-  .step-viz {
-    max-width: 200px;
-    margin-top: 0;
-  }
-}
+/* Desktop layout — viz LEFT (sticky), text RIGHT */
 @media (min-width: 1024px) {
-  .transmission-steps { max-width: 78ch; }
-  .transmission-steps .step { grid-template-columns: 1fr 220px; }
-  .step-viz { max-width: 220px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .step-viz svg * {
-    animation: none !important;
-    transition: none !important;
+  .transmission-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
   }
+  .transmission-canvas-wrap {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: sticky;
+    top: calc(var(--header-h) + 12px);
+    height: calc(100vh - var(--header-h) - 24px);
+    height: calc(100dvh - var(--header-h) - 24px);
+    min-height: 540px;
+    order: 0;
+  }
+  .transmission-text { order: 1; min-width: 0; }
+  .step-mobile-viz { display: none !important; }
 }
 
 .transmission-final {
@@ -5307,330 +5400,492 @@ body.ex-modal-locked { overflow: hidden; }
 <!-- ═══════════════════════════════════════════════════════════════════
      SCREEN 4 · TRANSMISSION
      ═══════════════════════════════════════════════════════════════════ -->
-<section id="s04-transmission" class="section section--transmission" aria-labelledby="s04-h">
-  <span class="section-num mono">04 — погрешность передачи</span>
-  <h2 id="s04-h" class="section-h" data-reveal><span data-text-key="s04_h2_a">Почему обычные способы понять человека дают</span> <em>менее точный</em> результат</h2>
-  <p class="section-body" data-reveal data-reveal-delay="1">Представь обычную работу с психологом или другим помогающим специалистом. Чтобы он составил картину тебя, информация проходит через несколько звеньев — и на каждом неизбежно теряется в точности. Это не про плохого специалиста — это про устройство любого человеческого канала.</p>
-  <p class="cite-hint" data-reveal data-reveal-delay="2">Звёздочки <span class="nums">[<span class="cite-star-glyph">✱</span>1]&hairsp;…&hairsp;[<span class="cite-star-glyph">✱</span>5]</span> рядом с заголовками&nbsp;— нажми, чтобы увидеть исследование</p>
+<section id="s04-transmission" class="section section--transmission transmission-scroll" aria-labelledby="s04-h" data-stage="0">
+  <div class="transmission-grid">
+    <!-- LEFT: sticky canvas (≥1024px). Mobile fallback uses inline mini-svg in each step. -->
+    <div class="transmission-canvas-wrap">
+      <div class="transmission-canvas">
 
-  <ol class="transmission-steps">
-    <li class="step" data-reveal>
-      <span class="step-num mono">01</span>
-      <div class="step-body">
-        <h3><strong>ТЫ</strong> говоришь то, что замечаешь<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-01" aria-label="Показать исследование для шага 1"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">1</span></button></h3>
-        <p>Иногда мягче, чем есть на самом деле. Иногда строже к себе, чем стоило бы. Что-то забывается само собой, что-то не приходит в голову прямо сейчас, настроение тоже играет свою роль.</p>
-        <aside id="cite-01" class="step-cite" role="note">
-          <div class="step-cite-inner">
-            <span class="step-cite-cite">Нисбетт и Уилсон · «Рассказывая больше, чем можем знать» · Psychological Review, 1977</span>
-            <span class="step-cite-detail">У человека нет полного доступа к собственным мотивам — отчёты часто достраиваются по ходу рассказа, а не наблюдаются напрямую.</span>
-          </div>
-        </aside>
-      </div>
-      <!-- VIZ 01: «Вся ты» — 12 нюансов вокруг ядра, часть тускнеет в момент рассказа -->
-      <div class="step-viz" aria-hidden="true">
-        <svg viewBox="0 0 220 220" role="img">
+        <!-- Stage 0: ТЫ КАК ЕСТЬ — orbital field of nuances -->
+        <svg class="t-stage" data-i="0" viewBox="0 0 480 480" aria-hidden="true">
           <defs>
-            <radialGradient id="v1-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="currentColor" stop-opacity="0.18"/>
+            <radialGradient id="t0-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"  stop-color="currentColor" stop-opacity="0.16"/>
               <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
             </radialGradient>
           </defs>
-          <g transform="translate(110 100)">
-            <circle r="74" fill="url(#v1-glow)"/>
-            <circle r="62" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.28" stroke-dasharray="1 3"/>
-            <!-- Slow rotating field of nuances -->
-            <g style="animation: viz-slow-rotate 60s linear infinite; transform-origin: 0 0;">
-              <!-- 12 dots around — every 30deg, r=58 -->
-              <circle cx="58"     cy="0"      r="3.4" fill="currentColor" class="anim-fade" style="--target-opacity: 0.95"/>
-              <circle cx="50.23"  cy="-29"    r="3.2" fill="currentColor" class="anim-fade" style="--target-opacity: 0.85; animation-delay: 0.05s"/>
-              <circle cx="29"     cy="-50.23" r="3"   fill="currentColor" class="anim-fade" style="--target-opacity: 0.5; animation-delay: 0.1s"/>
-              <circle cx="0"      cy="-58"    r="3.2" fill="currentColor" class="anim-fade" style="--target-opacity: 0.9; animation-delay: 0.15s"/>
-              <circle cx="-29"    cy="-50.23" r="2.8" fill="currentColor" class="anim-fade" style="--target-opacity: 0.4; animation-delay: 0.2s"/>
-              <circle cx="-50.23" cy="-29"    r="3"   fill="currentColor" class="anim-fade" style="--target-opacity: 0.78; animation-delay: 0.25s"/>
-              <circle cx="-58"    cy="0"      r="3.4" fill="currentColor" class="anim-fade" style="--target-opacity: 0.92; animation-delay: 0.3s"/>
-              <circle cx="-50.23" cy="29"     r="2.8" fill="currentColor" class="anim-fade" style="--target-opacity: 0.45; animation-delay: 0.35s"/>
-              <circle cx="-29"    cy="50.23"  r="3.2" fill="currentColor" class="anim-fade" style="--target-opacity: 0.82; animation-delay: 0.4s"/>
-              <circle cx="0"      cy="58"     r="3"   fill="currentColor" class="anim-fade" style="--target-opacity: 0.55; animation-delay: 0.45s"/>
-              <circle cx="29"     cy="50.23"  r="3.2" fill="currentColor" class="anim-fade" style="--target-opacity: 0.88; animation-delay: 0.5s"/>
-              <circle cx="50.23"  cy="29"     r="2.8" fill="currentColor" class="anim-fade" style="--target-opacity: 0.42; animation-delay: 0.55s"/>
+          <g transform="translate(240 220)">
+            <circle r="200" fill="url(#t0-glow)"/>
+            <!-- Three orbital rings, dashed -->
+            <circle r="170" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.18" stroke-dasharray="1 4"/>
+            <circle r="118" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.22" stroke-dasharray="1 4"/>
+            <circle r="64"  fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.28" stroke-dasharray="1 4"/>
+
+            <!-- Outer orbit: 18 dots, 60s clockwise -->
+            <g class="t0-orbit-outer">
+              <g transform="rotate(0)"   ><circle cx="170" cy="0" r="3.2" fill="currentColor" opacity="0.92"/></g>
+              <g transform="rotate(20)"  ><circle cx="170" cy="0" r="2.6" fill="currentColor" opacity="0.55"/></g>
+              <g transform="rotate(40)"  ><circle cx="170" cy="0" r="3.4" fill="currentColor" opacity="0.88"/></g>
+              <g transform="rotate(60)"  ><circle cx="170" cy="0" r="2.8" fill="currentColor" opacity="0.42"/></g>
+              <g transform="rotate(80)"  ><circle cx="170" cy="0" r="3.2" fill="currentColor" opacity="0.78"/></g>
+              <g transform="rotate(100)" ><circle cx="170" cy="0" r="2.4" fill="currentColor" opacity="0.5"/></g>
+              <g transform="rotate(120)" ><circle cx="170" cy="0" r="3.6" fill="currentColor" opacity="0.95"/></g>
+              <g transform="rotate(140)" ><circle cx="170" cy="0" r="2.8" fill="currentColor" opacity="0.6"/></g>
+              <g transform="rotate(160)" ><circle cx="170" cy="0" r="3.2" fill="currentColor" opacity="0.82"/></g>
+              <g transform="rotate(180)" ><circle cx="170" cy="0" r="2.6" fill="currentColor" opacity="0.45"/></g>
+              <g transform="rotate(200)" ><circle cx="170" cy="0" r="3.4" fill="currentColor" opacity="0.9"/></g>
+              <g transform="rotate(220)" ><circle cx="170" cy="0" r="2.8" fill="currentColor" opacity="0.55"/></g>
+              <g transform="rotate(240)" ><circle cx="170" cy="0" r="3.2" fill="currentColor" opacity="0.85"/></g>
+              <g transform="rotate(260)" ><circle cx="170" cy="0" r="2.4" fill="currentColor" opacity="0.4"/></g>
+              <g transform="rotate(280)" ><circle cx="170" cy="0" r="3" fill="currentColor" opacity="0.7"/></g>
+              <g transform="rotate(300)" ><circle cx="170" cy="0" r="2.8" fill="currentColor" opacity="0.62"/></g>
+              <g transform="rotate(320)" ><circle cx="170" cy="0" r="3.4" fill="currentColor" opacity="0.92"/></g>
+              <g transform="rotate(340)" ><circle cx="170" cy="0" r="2.6" fill="currentColor" opacity="0.5"/></g>
             </g>
-            <!-- Bright core «ты как есть» -->
-            <circle r="6" fill="currentColor" opacity="0.95"/>
-            <circle r="11" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.6"/>
-            <!-- One nuance leaving — «то, что попадает в слова» -->
-            <circle cx="0" cy="62" r="2.6" fill="currentColor"
-                    style="animation: viz-drift-down 3.4s ease-in-out infinite; --target-opacity: 1;"/>
+            <!-- Middle orbit: 12 dots, 40s counter-clockwise -->
+            <g class="t0-orbit-mid">
+              <g transform="rotate(0)"   ><circle cx="118" cy="0" r="3.2" fill="currentColor" opacity="0.85"/></g>
+              <g transform="rotate(30)"  ><circle cx="118" cy="0" r="2.6" fill="currentColor" opacity="0.55"/></g>
+              <g transform="rotate(60)"  ><circle cx="118" cy="0" r="3.4" fill="currentColor" opacity="0.92"/></g>
+              <g transform="rotate(90)"  ><circle cx="118" cy="0" r="2.8" fill="currentColor" opacity="0.45"/></g>
+              <g transform="rotate(120)" ><circle cx="118" cy="0" r="3.2" fill="currentColor" opacity="0.8"/></g>
+              <g transform="rotate(150)" ><circle cx="118" cy="0" r="2.4" fill="currentColor" opacity="0.55"/></g>
+              <g transform="rotate(180)" ><circle cx="118" cy="0" r="3.6" fill="currentColor" opacity="0.95"/></g>
+              <g transform="rotate(210)" ><circle cx="118" cy="0" r="2.6" fill="currentColor" opacity="0.5"/></g>
+              <g transform="rotate(240)" ><circle cx="118" cy="0" r="3" fill="currentColor" opacity="0.78"/></g>
+              <g transform="rotate(270)" ><circle cx="118" cy="0" r="2.8" fill="currentColor" opacity="0.62"/></g>
+              <g transform="rotate(300)" ><circle cx="118" cy="0" r="3.2" fill="currentColor" opacity="0.88"/></g>
+              <g transform="rotate(330)" ><circle cx="118" cy="0" r="2.4" fill="currentColor" opacity="0.42"/></g>
+            </g>
+            <!-- Inner orbit: 6 dots, 30s clockwise -->
+            <g class="t0-orbit-inner">
+              <g transform="rotate(0)"   ><circle cx="64" cy="0" r="3" fill="currentColor" opacity="0.85"/></g>
+              <g transform="rotate(60)"  ><circle cx="64" cy="0" r="2.6" fill="currentColor" opacity="0.6"/></g>
+              <g transform="rotate(120)" ><circle cx="64" cy="0" r="3.2" fill="currentColor" opacity="0.92"/></g>
+              <g transform="rotate(180)" ><circle cx="64" cy="0" r="2.8" fill="currentColor" opacity="0.7"/></g>
+              <g transform="rotate(240)" ><circle cx="64" cy="0" r="3.4" fill="currentColor" opacity="0.95"/></g>
+              <g transform="rotate(300)" ><circle cx="64" cy="0" r="2.6" fill="currentColor" opacity="0.55"/></g>
+            </g>
+            <!-- Bright core -->
+            <circle r="14" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+            <circle r="9"  fill="currentColor" opacity="0.95"/>
           </g>
-          <text x="110" y="208" text-anchor="middle" class="viz-pct"
-                style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;">
-            <tspan>вся ты</tspan>
-            <tspan dx="6" fill="currentColor" opacity="0.55">→ часть в слова</tspan>
-          </text>
+          <!-- Mono caption -->
+          <g transform="translate(240 460)">
+            <text class="t-stage-tag" text-anchor="middle">— ТЫ КАК ЕСТЬ —</text>
+            <text class="t-stage-num" text-anchor="middle" y="22">сложность без потерь</text>
+          </g>
+        </svg>
+
+        <!-- Stage 1: СПЕЦИАЛИСТ СЛЫШИТ ≈ 25% -->
+        <svg class="t-stage" data-i="1" viewBox="0 0 480 480" aria-hidden="true">
+          <!-- Top: stream of nuances dropping down -->
+          <g class="t1-stream">
+            <line x1="80"  y1="40"  x2="80"  y2="74"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.92"/>
+            <line x1="120" y1="44"  x2="120" y2="80"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+            <line x1="160" y1="40"  x2="160" y2="72"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
+            <line x1="200" y1="48"  x2="200" y2="84"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.88"/>
+            <line x1="240" y1="42"  x2="240" y2="76"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.92"/>
+            <line x1="280" y1="46"  x2="280" y2="80"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+            <line x1="320" y1="40"  x2="320" y2="72"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.9"/>
+            <line x1="360" y1="46"  x2="360" y2="78"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+            <line x1="400" y1="42"  x2="400" y2="74"  stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+            <line x1="100" y1="100" x2="100" y2="130" stroke="currentColor" stroke-width="2"   stroke-linecap="round" opacity="0.78"/>
+            <line x1="180" y1="104" x2="180" y2="134" stroke="currentColor" stroke-width="2"   stroke-linecap="round" opacity="0.7"/>
+            <line x1="260" y1="100" x2="260" y2="130" stroke="currentColor" stroke-width="2"   stroke-linecap="round" opacity="0.78"/>
+            <line x1="340" y1="104" x2="340" y2="134" stroke="currentColor" stroke-width="2"   stroke-linecap="round" opacity="0.72"/>
+          </g>
+
+          <!-- Sieve / filter: bracket lines + 4 «teeth» blocking most -->
+          <g transform="translate(0 196)">
+            <line x1="44" y1="0"  x2="436" y2="0"  stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+            <line x1="44" y1="36" x2="436" y2="36" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+            <!-- 9 teeth blocking, 4 gaps -->
+            <line x1="68"  y1="2"  x2="68"  y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <line x1="108" y1="2"  x2="108" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <line x1="148" y1="2"  x2="148" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <!-- gap @ 200 -->
+            <line x1="232" y1="2"  x2="232" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <line x1="272" y1="2"  x2="272" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <line x1="312" y1="2"  x2="312" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <!-- gap @ 360 -->
+            <line x1="392" y1="2"  x2="392" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <line x1="412" y1="2"  x2="412" y2="34" stroke="currentColor" stroke-width="3.6" opacity="0.65" stroke-linecap="round"/>
+            <text x="240" y="-12" text-anchor="middle" class="t-stage-tag">— СЛУХ —</text>
+          </g>
+
+          <!-- Bottom: only ~25% made it through -->
+          <g class="t1-passed">
+            <line x1="120" y1="280" x2="120" y2="320" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity="0.88"/>
+            <line x1="200" y1="282" x2="200" y2="324" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity="0.92"/>
+            <line x1="280" y1="280" x2="280" y2="320" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity="0.85"/>
+          </g>
+
+          <g transform="translate(240 380)">
+            <text class="t-stage-pct" text-anchor="middle">≈ 25%</text>
+            <text class="t-stage-tag" text-anchor="middle" y="32">— ДОШЛО —</text>
+          </g>
+          <g transform="translate(240 460)">
+            <text class="t-stage-num" text-anchor="middle">три из дюжины</text>
+          </g>
+        </svg>
+
+        <!-- Stage 2: РАМКА ШКОЛЫ — snap to grid -->
+        <svg class="t-stage" data-i="2" viewBox="0 0 480 480" aria-hidden="true">
+          <!-- Top: organic blob falling in -->
+          <g transform="translate(240 90)" class="t2-blob">
+            <path d="M-50,-12 C-50,-42 -28,-58 0,-54 C36,-50 52,-26 48,4 C44,32 22,52 -10,50 C-44,46 -50,16 -50,-12 Z"
+                  fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.85"/>
+            <circle cx="-16" cy="-8"  r="3" fill="currentColor" opacity="0.7"/>
+            <circle cx="12"  cy="4"   r="3" fill="currentColor" opacity="0.7"/>
+            <circle cx="-4"  cy="28"  r="2.4" fill="currentColor" opacity="0.6"/>
+            <text x="0" y="-66" text-anchor="middle" class="t-stage-tag">— УСЛЫШАННОЕ —</text>
+          </g>
+
+          <!-- Arrow down -->
+          <g transform="translate(240 200)" stroke="currentColor" stroke-width="1.4" fill="none" opacity="0.5">
+            <line x1="0" y1="0" x2="0" y2="40" stroke-dasharray="2 4"/>
+            <polygon points="0,40 -5,34 5,34" fill="currentColor" stroke="none"/>
+          </g>
+
+          <!-- Bottom: 4×3 grid + dots snapping into specific cells -->
+          <g transform="translate(60 260)">
+            <!-- 4 columns × 3 rows = 12 cells, 90×40 each -->
+            <g stroke="currentColor" stroke-width="0.7" fill="none" opacity="0.42">
+              <rect x="0"   y="0"   width="90" height="40"/>
+              <rect x="90"  y="0"   width="90" height="40"/>
+              <rect x="180" y="0"   width="90" height="40"/>
+              <rect x="270" y="0"   width="90" height="40"/>
+              <rect x="0"   y="40"  width="90" height="40"/>
+              <rect x="90"  y="40"  width="90" height="40"/>
+              <rect x="180" y="40"  width="90" height="40"/>
+              <rect x="270" y="40"  width="90" height="40"/>
+              <rect x="0"   y="80"  width="90" height="40"/>
+              <rect x="90"  y="80"  width="90" height="40"/>
+              <rect x="180" y="80"  width="90" height="40"/>
+              <rect x="270" y="80"  width="90" height="40"/>
+            </g>
+            <!-- Highlighted (selected) cells with bright dots -->
+            <rect x="90"  y="0"  width="90" height="40" fill="currentColor" opacity="0.16"/>
+            <rect x="270" y="40" width="90" height="40" fill="currentColor" opacity="0.16"/>
+            <rect x="180" y="80" width="90" height="40" fill="currentColor" opacity="0.16"/>
+            <circle cx="135" cy="20"  r="3.6" fill="currentColor" opacity="0.95" class="t2-snap-1"/>
+            <circle cx="315" cy="60"  r="3.6" fill="currentColor" opacity="0.95" class="t2-snap-2"/>
+            <circle cx="225" cy="100" r="3.6" fill="currentColor" opacity="0.95" class="t2-snap-3"/>
+            <text x="180" y="-12" text-anchor="middle" class="t-stage-tag">— РАМКА ШКОЛЫ —</text>
+          </g>
+
+          <g transform="translate(240 426)">
+            <text class="t-stage-num" text-anchor="middle">живая форма выровнена по клеткам</text>
+          </g>
+        </svg>
+
+        <!-- Stage 3: СЛОВАРЬ — выбор слова -->
+        <svg class="t-stage" data-i="3" viewBox="0 0 480 480" aria-hidden="true">
+          <!-- Top: «ПОНЯЛ» — inner understanding (cloud) -->
+          <g transform="translate(240 100)">
+            <ellipse cx="0" cy="0" rx="80" ry="50" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7"/>
+            <circle cx="-30" cy="-14" r="3.2" fill="currentColor" opacity="0.85"/>
+            <circle cx="14"  cy="-4"  r="3.2" fill="currentColor" opacity="0.85"/>
+            <circle cx="-10" cy="20"  r="2.6" fill="currentColor" opacity="0.7"/>
+            <circle cx="34"  cy="14"  r="2.6" fill="currentColor" opacity="0.7"/>
+            <text x="0" y="-66" text-anchor="middle" class="t-stage-tag">— ПОНЯЛ —</text>
+          </g>
+
+          <!-- Funnel arrows from cloud to one slot -->
+          <g stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5">
+            <path d="M180 142 L240 220" stroke-dasharray="3 4"/>
+            <path d="M300 142 L240 220" stroke-dasharray="3 4"/>
+            <polygon points="240,222 235,212 245,212" fill="currentColor" stroke="none"/>
+          </g>
+
+          <!-- Dictionary row — 7 cells, middle one selected -->
+          <g transform="translate(35 248)">
+            <!-- Dim cells -->
+            <rect x="0"   y="0" width="55" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.42"/>
+            <rect x="60"  y="0" width="55" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.42"/>
+            <rect x="120" y="0" width="55" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.42"/>
+            <!-- Selected — bright filled, pulsing -->
+            <rect x="180" y="0" width="55" height="50" rx="6" fill="currentColor" opacity="0.85" class="t3-selected"/>
+            <rect x="240" y="0" width="55" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.42"/>
+            <rect x="300" y="0" width="55" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.42"/>
+            <rect x="360" y="0" width="55" height="50" rx="6" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.42"/>
+            <!-- Dim dots inside rejected -->
+            <circle cx="27"  cy="25" r="2.6" fill="currentColor" opacity="0.32"/>
+            <circle cx="87"  cy="25" r="2.6" fill="currentColor" opacity="0.32"/>
+            <circle cx="147" cy="25" r="2.6" fill="currentColor" opacity="0.32"/>
+            <circle cx="267" cy="25" r="2.6" fill="currentColor" opacity="0.32"/>
+            <circle cx="327" cy="25" r="2.6" fill="currentColor" opacity="0.32"/>
+            <circle cx="387" cy="25" r="2.6" fill="currentColor" opacity="0.32"/>
+            <text x="205" y="-14" text-anchor="middle" class="t-stage-tag">— СЛОВАРЬ —</text>
+          </g>
+
+          <!-- Below: «выбранное слово» -->
+          <g transform="translate(240 348)">
+            <text x="0" y="0" text-anchor="middle" class="t-stage-word">«одно слово»</text>
+          </g>
+          <g transform="translate(240 400)">
+            <text class="t-stage-pct" text-anchor="middle">из ~7</text>
+            <text class="t-stage-tag" text-anchor="middle" y="32">— ВЫБРАНО —</text>
+          </g>
+          <g transform="translate(240 460)">
+            <text class="t-stage-num" text-anchor="middle">остальные нюансы потерялись в переводе</text>
+          </g>
+        </svg>
+
+        <!-- Stage 4: ТВОЁ «СЕЙЧАС» — мембрана + что прошло -->
+        <svg class="t-stage" data-i="4" viewBox="0 0 480 480" aria-hidden="true">
+          <!-- Incoming word from above -->
+          <g transform="translate(240 70)">
+            <text x="0" y="0" text-anchor="middle" class="t-stage-word">«одно слово»</text>
+            <line x1="0" y1="14" x2="0" y2="86" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.55"/>
+            <polygon points="0,86 -5,80 5,80" fill="currentColor" opacity="0.7"/>
+          </g>
+
+          <!-- Membrane: твоё «сейчас» — three layered wavy paths -->
+          <g transform="translate(240 200)">
+            <text x="0" y="-32" text-anchor="middle" class="t-stage-tag">— ТВОЁ «СЕЙЧАС» —</text>
+            <path class="t4-wave-1" d="M-180,0 Q-130,-18 -80,0 T20,0 T120,0 T180,0"
+                  fill="none" stroke="currentColor" stroke-width="2" opacity="0.78"/>
+            <path class="t4-wave-2" d="M-180,16 Q-130,-2 -80,16 T20,16 T120,16 T180,16"
+                  fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
+            <path class="t4-wave-3" d="M-180,30 Q-130,12 -80,30 T20,30 T120,30 T180,30"
+                  fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.32"/>
+          </g>
+
+          <!-- Below: fragments that made it through -->
+          <g transform="translate(240 300)">
+            <circle cx="-72" cy="0"  r="3.6" fill="currentColor" opacity="0.92"/>
+            <circle cx="-24" cy="14" r="3"   fill="currentColor" opacity="0.7"/>
+            <circle cx="34"  cy="-6" r="3.8" fill="currentColor" opacity="0.95"/>
+            <circle cx="74"  cy="18" r="2.4" fill="currentColor" opacity="0.55"/>
+            <!-- Bouncing back fragments — dotted return arcs -->
+            <g stroke="currentColor" stroke-width="0.7" fill="none" opacity="0.32">
+              <path d="M-50,-30 Q-30,-50 -10,-30" stroke-dasharray="1 3"/>
+              <path d="M50,-30  Q70,-50  90,-30"  stroke-dasharray="1 3"/>
+            </g>
+          </g>
+
+          <!-- Reassembled — partial -->
+          <g transform="translate(240 360)">
+            <text x="0" y="0" text-anchor="middle" class="t-stage-word t-stage-word--partial">«сло…»</text>
+          </g>
+          <g transform="translate(240 412)">
+            <text class="t-stage-pct" text-anchor="middle">≈ ½</text>
+            <text class="t-stage-tag" text-anchor="middle" y="32">— УДЕРЖАНО —</text>
+          </g>
+          <g transform="translate(240 460)">
+            <text class="t-stage-num" text-anchor="middle">через фильтр твоего состояния</text>
+          </g>
         </svg>
       </div>
-    </li>
-    <li class="step" data-reveal data-reveal-delay="1">
-      <span class="step-num mono">02</span>
-      <div class="step-body">
-        <h3><strong>СПЕЦИАЛИСТ</strong> слышит то, что услышал<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-02" aria-label="Показать исследование для шага 2"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">2</span></button></h3>
-        <p>Слышим мы все по-своему. Что-то ловится ярче, что-то проходит фоном — это нормально и неизбежно. Слова и интонации — не точные приборы.</p>
-        <aside id="cite-02" class="step-cite" role="note">
-          <div class="step-cite-inner">
-            <span class="step-cite-cite">Николс и Стивенс · «Слышите ли вы меня?» · McGraw-Hill, 1957</span>
-            <span class="step-cite-detail">Средняя эффективность слушания у взрослого ≈ 25% — устойчивый показатель когнитивной нагрузки.</span>
+    </div>
+
+    <!-- RIGHT: text content with 5 steps -->
+    <div class="transmission-text">
+      <span class="section-num mono">04 — погрешность передачи</span>
+      <h2 id="s04-h" class="section-h" data-reveal><span data-text-key="s04_h2_a">Почему обычные способы понять человека дают</span> <em>менее точный</em> результат</h2>
+      <p class="section-body" data-reveal data-reveal-delay="1">Представь обычную работу с психологом или другим помогающим специалистом. Чтобы он составил картину тебя, информация проходит через несколько звеньев — и на каждом неизбежно теряется в точности. Это не про плохого специалиста — это про устройство любого человеческого канала.</p>
+      <p class="cite-hint" data-reveal data-reveal-delay="2">Звёздочки <span class="nums">[<span class="cite-star-glyph">✱</span>1]&hairsp;…&hairsp;[<span class="cite-star-glyph">✱</span>5]</span> рядом с заголовками&nbsp;— нажми, чтобы увидеть исследование</p>
+
+      <ol class="transmission-steps">
+        <li class="step" data-stage-i="0" data-reveal>
+          <span class="step-num mono">01</span>
+          <div class="step-body">
+            <!-- mobile-only mini-svg, mirrors stage 0 essence -->
+            <svg class="step-mobile-viz" viewBox="0 0 220 220" aria-hidden="true">
+              <g transform="translate(110 100)">
+                <circle r="74" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.22" stroke-dasharray="1 3"/>
+                <circle r="50" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.28" stroke-dasharray="1 3"/>
+                <g class="t0-orbit-outer">
+                  <g transform="rotate(0)"><circle cx="74" cy="0" r="2.6" fill="currentColor" opacity="0.9"/></g>
+                  <g transform="rotate(45)"><circle cx="74" cy="0" r="2" fill="currentColor" opacity="0.55"/></g>
+                  <g transform="rotate(90)"><circle cx="74" cy="0" r="2.6" fill="currentColor" opacity="0.85"/></g>
+                  <g transform="rotate(135)"><circle cx="74" cy="0" r="2" fill="currentColor" opacity="0.45"/></g>
+                  <g transform="rotate(180)"><circle cx="74" cy="0" r="2.6" fill="currentColor" opacity="0.9"/></g>
+                  <g transform="rotate(225)"><circle cx="74" cy="0" r="2" fill="currentColor" opacity="0.55"/></g>
+                  <g transform="rotate(270)"><circle cx="74" cy="0" r="2.6" fill="currentColor" opacity="0.85"/></g>
+                  <g transform="rotate(315)"><circle cx="74" cy="0" r="2" fill="currentColor" opacity="0.5"/></g>
+                </g>
+                <g class="t0-orbit-mid">
+                  <g transform="rotate(0)"><circle cx="50" cy="0" r="2.4" fill="currentColor" opacity="0.85"/></g>
+                  <g transform="rotate(72)"><circle cx="50" cy="0" r="2" fill="currentColor" opacity="0.6"/></g>
+                  <g transform="rotate(144)"><circle cx="50" cy="0" r="2.4" fill="currentColor" opacity="0.9"/></g>
+                  <g transform="rotate(216)"><circle cx="50" cy="0" r="2" fill="currentColor" opacity="0.55"/></g>
+                  <g transform="rotate(288)"><circle cx="50" cy="0" r="2.4" fill="currentColor" opacity="0.78"/></g>
+                </g>
+                <circle r="6" fill="currentColor" opacity="0.95"/>
+              </g>
+              <text x="110" y="208" text-anchor="middle" class="t-stage-tag">— ТЫ КАК ЕСТЬ —</text>
+            </svg>
+            <h3><strong>ТЫ</strong> говоришь то, что замечаешь<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-01" aria-label="Показать исследование для шага 1"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">1</span></button></h3>
+            <p>Иногда мягче, чем есть на самом деле. Иногда строже к себе, чем стоило бы. Что-то забывается само собой, что-то не приходит в голову прямо сейчас, настроение тоже играет свою роль.</p>
+            <aside id="cite-01" class="step-cite" role="note">
+              <div class="step-cite-inner">
+                <span class="step-cite-cite">Нисбетт и Уилсон · «Рассказывая больше, чем можем знать» · Psychological Review, 1977</span>
+                <span class="step-cite-detail">У человека нет полного доступа к собственным мотивам — отчёты часто достраиваются по ходу рассказа, а не наблюдаются напрямую.</span>
+              </div>
+            </aside>
           </div>
-        </aside>
-      </div>
-      <!-- VIZ 02: Поток слов сверху → сито → ~25% доходит вниз -->
-      <div class="step-viz" aria-hidden="true">
-        <svg viewBox="0 0 220 220" role="img">
-          <defs>
-            <linearGradient id="v2-fade" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"  stop-color="currentColor" stop-opacity="0.85"/>
-              <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <!-- Top: stream of «words» (12 ticks) -->
-          <g class="anim-fade" style="--target-opacity: 1">
-            <line x1="40"  y1="20" x2="40"  y2="34" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
-            <line x1="60"  y1="22" x2="60"  y2="38" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
-            <line x1="80"  y1="20" x2="80"  y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
-            <line x1="100" y1="24" x2="100" y2="40" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.88"/>
-            <line x1="120" y1="22" x2="120" y2="36" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.92"/>
-            <line x1="140" y1="20" x2="140" y2="34" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
-            <line x1="160" y1="24" x2="160" y2="38" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
-            <line x1="180" y1="20" x2="180" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
-            <line x1="50"  y1="40" x2="50"  y2="52" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.75"/>
-            <line x1="90"  y1="44" x2="90"  y2="58" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
-            <line x1="130" y1="42" x2="130" y2="54" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.78"/>
-            <line x1="170" y1="44" x2="170" y2="56" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity="0.72"/>
-          </g>
-
-          <!-- Sieve / filter -->
-          <g transform="translate(0 100)">
-            <line x1="20" y1="0" x2="200" y2="0" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
-            <line x1="20" y1="14" x2="200" y2="14" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
-            <!-- Vertical bars on sieve — gaps where info gets through -->
-            <line x1="35"  y1="0" x2="35"  y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <line x1="55"  y1="0" x2="55"  y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <line x1="85"  y1="0" x2="85"  y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <line x1="115" y1="0" x2="115" y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <line x1="135" y1="0" x2="135" y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <line x1="165" y1="0" x2="165" y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <line x1="185" y1="0" x2="185" y2="14" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-            <text x="110" y="-4" text-anchor="middle" style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;" fill="currentColor" opacity="0.5">слух</text>
-          </g>
-
-          <!-- Bottom: only ~3 of 12 made it through -->
-          <g class="anim-fade" style="--target-opacity: 1; animation-delay: 0.4s;">
-            <line x1="70"  y1="140" x2="70"  y2="160" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
-            <line x1="110" y1="142" x2="110" y2="166" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.92"/>
-            <line x1="150" y1="140" x2="150" y2="158" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.78"/>
-          </g>
-          <text x="110" y="208" text-anchor="middle" class="viz-pct"
-                style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;">
-            <tspan>дошло</tspan>
-            <tspan dx="6" fill="currentColor">≈ 25%</tspan>
-          </text>
-        </svg>
-      </div>
-    </li>
-    <li class="step" data-reveal data-reveal-delay="2">
-      <span class="step-num mono">03</span>
-      <div class="step-body">
-        <h3><strong>ОН</strong> переводит услышанное в свою рамку<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-03" aria-label="Показать исследование для шага 3"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">3</span></button></h3>
-        <p>В ту психологическую школу, в тот метод, в ту систему понимания, которая ему близка. Каждая школа — это набор линз, через которые видно одно и не видно другое.</p>
-        <aside id="cite-03" class="step-cite" role="note">
-          <div class="step-cite-inner">
-            <span class="step-cite-cite">Бартлетт · «Запоминание: исследование в экспериментальной и социальной психологии» · Cambridge University Press, 1932</span>
-            <span class="step-cite-detail">Память достраивает услышанное под уже имеющиеся в голове рамки. Это устройство восприятия, не предвзятость.</span>
+        </li>
+        <li class="step" data-stage-i="1" data-reveal data-reveal-delay="1">
+          <span class="step-num mono">02</span>
+          <div class="step-body">
+            <svg class="step-mobile-viz" viewBox="0 0 220 220" aria-hidden="true">
+              <g class="t1-stream">
+                <line x1="40"  y1="20" x2="40"  y2="38" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+                <line x1="70"  y1="22" x2="70"  y2="40" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+                <line x1="100" y1="20" x2="100" y2="38" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+                <line x1="130" y1="24" x2="130" y2="42" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.88"/>
+                <line x1="160" y1="22" x2="160" y2="40" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+                <line x1="190" y1="20" x2="190" y2="38" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+              </g>
+              <g transform="translate(0 100)">
+                <line x1="20" y1="0"  x2="200" y2="0"  stroke="currentColor" stroke-width="0.9" opacity="0.5"/>
+                <line x1="20" y1="16" x2="200" y2="16" stroke="currentColor" stroke-width="0.9" opacity="0.5"/>
+                <line x1="36"  y1="2" x2="36"  y2="14" stroke="currentColor" stroke-width="2.2" opacity="0.65"/>
+                <line x1="58"  y1="2" x2="58"  y2="14" stroke="currentColor" stroke-width="2.2" opacity="0.65"/>
+                <line x1="80"  y1="2" x2="80"  y2="14" stroke="currentColor" stroke-width="2.2" opacity="0.65"/>
+                <line x1="124" y1="2" x2="124" y2="14" stroke="currentColor" stroke-width="2.2" opacity="0.65"/>
+                <line x1="146" y1="2" x2="146" y2="14" stroke="currentColor" stroke-width="2.2" opacity="0.65"/>
+                <line x1="190" y1="2" x2="190" y2="14" stroke="currentColor" stroke-width="2.2" opacity="0.65"/>
+                <text x="110" y="-6" text-anchor="middle" class="t-stage-tag">— СЛУХ —</text>
+              </g>
+              <g class="t1-passed">
+                <line x1="60"  y1="148" x2="60"  y2="172" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.88"/>
+                <line x1="110" y1="146" x2="110" y2="174" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.92"/>
+                <line x1="160" y1="148" x2="160" y2="172" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+              </g>
+              <text x="110" y="208" text-anchor="middle" class="t-stage-pct">≈ 25% ДОШЛО</text>
+            </svg>
+            <h3><strong>СПЕЦИАЛИСТ</strong> слышит то, что услышал<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-02" aria-label="Показать исследование для шага 2"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">2</span></button></h3>
+            <p>Слышим мы все по-своему. Что-то ловится ярче, что-то проходит фоном — это нормально и неизбежно. Слова и интонации — не точные приборы.</p>
+            <aside id="cite-02" class="step-cite" role="note">
+              <div class="step-cite-inner">
+                <span class="step-cite-cite">Николс и Стивенс · «Слышите ли вы меня?» · McGraw-Hill, 1957</span>
+                <span class="step-cite-detail">Средняя эффективность слушания у взрослого ≈ 25% — устойчивый показатель когнитивной нагрузки.</span>
+              </div>
+            </aside>
           </div>
-        </aside>
-      </div>
-      <!-- VIZ 03: Округлая форма входит → проходит через сетку «школы» → выходит «прямоугольной» -->
-      <div class="step-viz" aria-hidden="true">
-        <svg viewBox="0 0 220 220" role="img">
-          <!-- Input: organic blob (same as «ты как услышал») -->
-          <g transform="translate(46 100)" class="anim-fade" style="--target-opacity: 1">
-            <path d="M-26,-8 C-26,-22 -14,-30 0,-28 C18,-26 26,-14 24,2 C22,18 12,28 -4,26 C-22,24 -26,8 -26,-8 Z"
-                  fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.85"/>
-            <circle cx="-8" cy="-4" r="2" fill="currentColor" opacity="0.7"/>
-            <circle cx="6"  cy="2"  r="2" fill="currentColor" opacity="0.7"/>
-            <circle cx="-2" cy="14" r="1.6" fill="currentColor" opacity="0.6"/>
-          </g>
-
-          <!-- Filter: grid-shaped «school frame» -->
-          <g transform="translate(110 100)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.2s;">
-            <rect x="-22" y="-26" width="44" height="52" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.55"/>
-            <line x1="-22" y1="-13" x2="22"  y2="-13" stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
-            <line x1="-22" y1="0"   x2="22"  y2="0"   stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
-            <line x1="-22" y1="13"  x2="22"  y2="13"  stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
-            <line x1="-7"  y1="-26" x2="-7"  y2="26"  stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
-            <line x1="7"   y1="-26" x2="7"   y2="26"  stroke="currentColor" stroke-width="0.6" opacity="0.4"/>
-            <text x="0" y="-34" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;"
-                  fill="currentColor" opacity="0.5">рамка</text>
-          </g>
-
-          <!-- Output: form snapped to grid (rectangular «aligned» version) -->
-          <g transform="translate(174 100)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.4s;">
-            <rect x="-22" y="-22" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.85"/>
-            <line x1="-22" y1="-7"  x2="22"  y2="-7"  stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
-            <line x1="-22" y1="7"   x2="22"  y2="7"   stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
-            <circle cx="-7" cy="-7" r="1.8" fill="currentColor" opacity="0.65"/>
-            <circle cx="7"  cy="0"  r="1.8" fill="currentColor" opacity="0.65"/>
-          </g>
-
-          <!-- Arrows -->
-          <g stroke="currentColor" stroke-width="0.8" opacity="0.4">
-            <line x1="76" y1="100" x2="86" y2="100" stroke-dasharray="2 2"/>
-            <polygon points="86,100 82,98 82,102" fill="currentColor" stroke="none"/>
-            <line x1="138" y1="100" x2="148" y2="100" stroke-dasharray="2 2"/>
-            <polygon points="148,100 144,98 144,102" fill="currentColor" stroke="none"/>
-          </g>
-
-          <text x="110" y="208" text-anchor="middle" class="viz-pct"
-                style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;">
-            <tspan>живая форма</tspan>
-            <tspan dx="6" fill="currentColor" opacity="0.55">→ по сетке</tspan>
-          </text>
-        </svg>
-      </div>
-    </li>
-    <li class="step" data-reveal data-reveal-delay="3">
-      <span class="step-num mono">04</span>
-      <div class="step-body">
-        <h3><strong>ОН</strong> подбирает слова, чтобы передать тебе<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-04" aria-label="Показать исследование для шага 4"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">4</span></button></h3>
-        <p>То, что он понял из услышанного. Снова — фильтр. Слова, которые звучат привычно для него, могут не совпадать с тем, как ты на самом деле <span data-gx-fem="устроена" data-gx-masc="устроен">устроена</span>.</p>
-        <aside id="cite-04" class="step-cite" role="note">
-          <div class="step-cite-inner">
-            <span class="step-cite-cite">Бреннан и Кларк · «Понятийные соглашения в разговоре» · Journal of Experimental Psychology, 1996</span>
-            <span class="step-cite-detail">Понятийные словари специалиста и клиента не совпадают — перевод неизбежно срезает нюансы.</span>
+        </li>
+        <li class="step" data-stage-i="2" data-reveal data-reveal-delay="2">
+          <span class="step-num mono">03</span>
+          <div class="step-body">
+            <svg class="step-mobile-viz" viewBox="0 0 220 220" aria-hidden="true">
+              <g transform="translate(110 50)">
+                <path d="M-22,-6 C-22,-22 -10,-30 0,-28 C16,-26 22,-12 20,2 C18,16 8,26 -4,24 C-18,22 -22,8 -22,-6 Z"
+                      fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.85"/>
+                <circle cx="-6"  cy="-2" r="1.8" fill="currentColor" opacity="0.7"/>
+                <circle cx="6"   cy="4"  r="1.8" fill="currentColor" opacity="0.7"/>
+              </g>
+              <g transform="translate(110 100)" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.5">
+                <line x1="0" y1="0" x2="0" y2="20" stroke-dasharray="2 3"/>
+                <polygon points="0,20 -3,15 3,15" fill="currentColor" stroke="none"/>
+              </g>
+              <g transform="translate(35 130)">
+                <g stroke="currentColor" stroke-width="0.7" fill="none" opacity="0.45">
+                  <rect x="0"  y="0"  width="38" height="22"/>
+                  <rect x="38" y="0"  width="38" height="22"/>
+                  <rect x="76" y="0"  width="38" height="22"/>
+                  <rect x="114" y="0" width="38" height="22"/>
+                  <rect x="0"  y="22" width="38" height="22"/>
+                  <rect x="38" y="22" width="38" height="22"/>
+                  <rect x="76" y="22" width="38" height="22"/>
+                  <rect x="114" y="22" width="38" height="22"/>
+                </g>
+                <rect x="38" y="0"  width="38" height="22" fill="currentColor" opacity="0.16"/>
+                <rect x="76" y="22" width="38" height="22" fill="currentColor" opacity="0.16"/>
+                <circle cx="57"  cy="11" r="2.4" fill="currentColor" opacity="0.95"/>
+                <circle cx="95"  cy="33" r="2.4" fill="currentColor" opacity="0.95"/>
+                <text x="76" y="-6" text-anchor="middle" class="t-stage-tag">— РАМКА —</text>
+              </g>
+              <text x="110" y="208" text-anchor="middle" class="t-stage-num">по сетке школы</text>
+            </svg>
+            <h3><strong>ОН</strong> переводит услышанное в свою рамку<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-03" aria-label="Показать исследование для шага 3"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">3</span></button></h3>
+            <p>В ту психологическую школу, в тот метод, в ту систему понимания, которая ему близка. Каждая школа — это набор линз, через которые видно одно и не видно другое.</p>
+            <aside id="cite-03" class="step-cite" role="note">
+              <div class="step-cite-inner">
+                <span class="step-cite-cite">Бартлетт · «Запоминание: исследование в экспериментальной и социальной психологии» · Cambridge University Press, 1932</span>
+                <span class="step-cite-detail">Память достраивает услышанное под уже имеющиеся в голове рамки. Это устройство восприятия, не предвзятость.</span>
+              </div>
+            </aside>
           </div>
-        </aside>
-      </div>
-      <!-- VIZ 04: «Слова-словарь» — выбирается одно из множества вариантов -->
-      <div class="step-viz" aria-hidden="true">
-        <svg viewBox="0 0 220 220" role="img">
-          <!-- Inner understanding (top) -->
-          <g transform="translate(110 50)" class="anim-fade" style="--target-opacity: 1">
-            <ellipse cx="0" cy="0" rx="32" ry="22" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.7" stroke-dasharray="3 3"/>
-            <circle cx="-12" cy="-6" r="2.4" fill="currentColor" opacity="0.85"/>
-            <circle cx="6"   cy="-2" r="2.4" fill="currentColor" opacity="0.85"/>
-            <circle cx="-4"  cy="8"  r="2"   fill="currentColor" opacity="0.7"/>
-            <text x="0" y="-30" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;"
-                  fill="currentColor" opacity="0.55">понял</text>
-          </g>
-
-          <!-- Funnel/arrow downward -->
-          <g stroke="currentColor" stroke-width="0.7" fill="none" opacity="0.45">
-            <path d="M70 80 L110 105 L150 80" stroke-dasharray="2 2"/>
-          </g>
-
-          <!-- Word slots (dictionary cells) — 6 candidates, 1 selected -->
-          <g transform="translate(20 130)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.3s;">
-            <!-- 6 slot cells -->
-            <rect x="0"   y="0" width="28" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
-            <rect x="32"  y="0" width="28" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
-            <rect x="64"  y="0" width="28" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
-            <!-- Selected cell — filled, bright -->
-            <rect x="96"  y="0" width="28" height="20" rx="3" fill="currentColor" opacity="0.85"
-                  style="animation: viz-pulse 2.4s ease-in-out infinite; --target-opacity: 0.85"/>
-            <rect x="128" y="0" width="28" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
-            <rect x="160" y="0" width="28" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
-            <!-- Mini dots on rejected cells -->
-            <circle cx="14"  cy="10" r="1.2" fill="currentColor" opacity="0.32"/>
-            <circle cx="46"  cy="10" r="1.2" fill="currentColor" opacity="0.32"/>
-            <circle cx="78"  cy="10" r="1.2" fill="currentColor" opacity="0.32"/>
-            <circle cx="142" cy="10" r="1.2" fill="currentColor" opacity="0.32"/>
-            <circle cx="174" cy="10" r="1.2" fill="currentColor" opacity="0.32"/>
-            <text x="94" y="-6" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;"
-                  fill="currentColor" opacity="0.55">словарь</text>
-          </g>
-
-          <!-- Highlight: word emerges -->
-          <g transform="translate(110 175)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.6s;">
-            <text x="0" y="0" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600;"
-                  fill="currentColor" opacity="0.95">«одно слово»</text>
-          </g>
-
-          <text x="110" y="208" text-anchor="middle" class="viz-pct"
-                style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;">
-            <tspan>выбрано из </tspan>
-            <tspan fill="currentColor">~6</tspan>
-          </text>
-        </svg>
-      </div>
-    </li>
-    <li class="step" data-reveal>
-      <span class="step-num mono">05</span>
-      <div class="step-body">
-        <h3><strong>ТЫ</strong> слышишь и интерпретируешь<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-05" aria-label="Показать исследование для шага 5"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">5</span></button></h3>
-        <p>Через свои фильтры, через своё текущее состояние, через то, что для тебя <span data-gx-fem="готова" data-gx-masc="готов">готова</span> сейчас услышать.</p>
-        <aside id="cite-05" class="step-cite" role="note">
-          <div class="step-cite-inner">
-            <span class="step-cite-cite">Кесселс · «Память пациента о медицинской информации» · Journal of the Royal Society of Medicine, 2003</span>
-            <span class="step-cite-detail">Из медицинской консультации сохраняется 40–80% содержания. Из запомненного — около половины с искажением.</span>
+        </li>
+        <li class="step" data-stage-i="3" data-reveal data-reveal-delay="3">
+          <span class="step-num mono">04</span>
+          <div class="step-body">
+            <svg class="step-mobile-viz" viewBox="0 0 220 220" aria-hidden="true">
+              <g transform="translate(110 46)">
+                <ellipse cx="0" cy="0" rx="38" ry="24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.7"/>
+                <circle cx="-14" cy="-6" r="2.4" fill="currentColor" opacity="0.85"/>
+                <circle cx="6"   cy="-2" r="2.4" fill="currentColor" opacity="0.85"/>
+                <circle cx="-4"  cy="10" r="2"   fill="currentColor" opacity="0.7"/>
+                <text x="0" y="-30" text-anchor="middle" class="t-stage-tag">— ПОНЯЛ —</text>
+              </g>
+              <g stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.5">
+                <path d="M85 96 L110 130" stroke-dasharray="2 3"/>
+                <path d="M135 96 L110 130" stroke-dasharray="2 3"/>
+              </g>
+              <g transform="translate(20 142)">
+                <rect x="0"   y="0" width="22" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+                <rect x="26"  y="0" width="22" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+                <rect x="52"  y="0" width="22" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+                <rect x="78"  y="0" width="22" height="20" rx="3" fill="currentColor" opacity="0.85" class="t3-selected"/>
+                <rect x="104" y="0" width="22" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+                <rect x="130" y="0" width="22" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+                <rect x="156" y="0" width="22" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.45"/>
+                <text x="89" y="-8" text-anchor="middle" class="t-stage-tag">— СЛОВАРЬ —</text>
+              </g>
+              <text x="110" y="200" text-anchor="middle" class="t-stage-word">«одно слово»</text>
+            </svg>
+            <h3><strong>ОН</strong> подбирает слова, чтобы передать тебе<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-04" aria-label="Показать исследование для шага 4"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">4</span></button></h3>
+            <p>То, что он понял из услышанного. Снова — фильтр. Слова, которые звучат привычно для него, могут не совпадать с тем, как ты на самом деле <span data-gx-fem="устроена" data-gx-masc="устроен">устроена</span>.</p>
+            <aside id="cite-04" class="step-cite" role="note">
+              <div class="step-cite-inner">
+                <span class="step-cite-cite">Бреннан и Кларк · «Понятийные соглашения в разговоре» · Journal of Experimental Psychology, 1996</span>
+                <span class="step-cite-detail">Понятийные словари специалиста и клиента не совпадают — перевод неизбежно срезает нюансы.</span>
+              </div>
+            </aside>
           </div>
-        </aside>
-      </div>
-      <!-- VIZ 05: Сообщение приходит → проходит через ТВОЁ состояние → часть отражается, часть искажается -->
-      <div class="step-viz" aria-hidden="true">
-        <svg viewBox="0 0 220 220" role="img">
-          <!-- Incoming message from above -->
-          <g transform="translate(110 32)" class="anim-fade" style="--target-opacity: 1">
-            <text x="0" y="0" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;"
-                  fill="currentColor" opacity="0.78">«одно слово»</text>
-            <line x1="0" y1="6" x2="0" y2="32" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
-            <polygon points="0,32 -3,28 3,28" fill="currentColor" opacity="0.7"/>
-          </g>
-
-          <!-- Your current state — translucent shimmering layer -->
-          <g transform="translate(110 95)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.2s;">
-            <!-- Wavy translucent membrane -->
-            <path d="M-78,0 Q-58,-8 -38,0 T2,0 T42,0 T82,0"
-                  fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.7"
-                  style="animation: viz-shake 4s ease-in-out infinite;"/>
-            <path d="M-78,8 Q-58,0 -38,8 T2,8 T42,8 T82,8"
-                  fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.45"
-                  style="animation: viz-shake 4.6s ease-in-out infinite;"/>
-            <text x="0" y="-12" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;"
-                  fill="currentColor" opacity="0.55">твоё «сейчас»</text>
-          </g>
-
-          <!-- Below membrane: fragmented dots that made it through -->
-          <g transform="translate(110 145)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.5s;">
-            <!-- A few dots that passed through, scattered -->
-            <circle cx="-32" cy="0"  r="2.4" fill="currentColor" opacity="0.85"/>
-            <circle cx="-12" cy="6"  r="2"   fill="currentColor" opacity="0.62"/>
-            <circle cx="14"  cy="-2" r="2.6" fill="currentColor" opacity="0.9"/>
-            <circle cx="32"  cy="8"  r="1.6" fill="currentColor" opacity="0.5"/>
-            <!-- Dots that bounced back (above line, fading up) -->
-            <circle cx="-22" cy="-22" r="1.2" fill="currentColor" opacity="0.32"/>
-            <circle cx="22"  cy="-26" r="1"   fill="currentColor" opacity="0.28"/>
-          </g>
-
-          <!-- A small fragment of original «word» reassembled — but partial -->
-          <g transform="translate(110 178)" class="anim-fade" style="--target-opacity: 1; animation-delay: 0.7s;">
-            <text x="0" y="0" text-anchor="middle"
-                  style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; font-style: italic;"
-                  fill="currentColor" opacity="0.7">«сло…»</text>
-          </g>
-
-          <text x="110" y="208" text-anchor="middle" class="viz-pct"
-                style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;">
-            <tspan>удержано </tspan>
-            <tspan fill="currentColor">≈ ½</tspan>
-          </text>
-        </svg>
-      </div>
-    </li>
-  </ol>
+        </li>
+        <li class="step" data-stage-i="4" data-reveal>
+          <span class="step-num mono">05</span>
+          <div class="step-body">
+            <svg class="step-mobile-viz" viewBox="0 0 220 220" aria-hidden="true">
+              <g transform="translate(110 32)">
+                <text x="0" y="0" text-anchor="middle" class="t-stage-word">«одно слово»</text>
+                <line x1="0" y1="6" x2="0" y2="32" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+                <polygon points="0,32 -3,28 3,28" fill="currentColor" opacity="0.7"/>
+              </g>
+              <g transform="translate(110 95)">
+                <text x="0" y="-12" text-anchor="middle" class="t-stage-tag">— ТВОЁ «СЕЙЧАС» —</text>
+                <path class="t4-wave-1" d="M-78,0 Q-58,-8 -38,0 T2,0 T42,0 T82,0" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.7"/>
+                <path class="t4-wave-2" d="M-78,8 Q-58,0 -38,8 T2,8 T42,8 T82,8" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.45"/>
+              </g>
+              <g transform="translate(110 145)">
+                <circle cx="-32" cy="0"  r="2.4" fill="currentColor" opacity="0.85"/>
+                <circle cx="-12" cy="6"  r="2"   fill="currentColor" opacity="0.62"/>
+                <circle cx="14"  cy="-2" r="2.6" fill="currentColor" opacity="0.9"/>
+                <circle cx="32"  cy="8"  r="1.6" fill="currentColor" opacity="0.5"/>
+              </g>
+              <g transform="translate(110 178)">
+                <text x="0" y="0" text-anchor="middle" class="t-stage-word t-stage-word--partial">«сло…»</text>
+              </g>
+              <text x="110" y="208" text-anchor="middle" class="t-stage-pct">≈ ½ УДЕРЖАНО</text>
+            </svg>
+            <h3><strong>ТЫ</strong> слышишь и интерпретируешь<button class="step-cite-num" type="button" aria-expanded="false" aria-controls="cite-05" aria-label="Показать исследование для шага 5"><span class="cite-star" aria-hidden="true">✱</span><span class="cite-num">5</span></button></h3>
+            <p>Через свои фильтры, через своё текущее состояние, через то, что для тебя <span data-gx-fem="готова" data-gx-masc="готов">готова</span> сейчас услышать.</p>
+            <aside id="cite-05" class="step-cite" role="note">
+              <div class="step-cite-inner">
+                <span class="step-cite-cite">Кесселс · «Память пациента о медицинской информации» · Journal of the Royal Society of Medicine, 2003</span>
+                <span class="step-cite-detail">Из медицинской консультации сохраняется 40–80% содержания. Из запомненного — около половины с искажением.</span>
+              </div>
+            </aside>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
 
   <!-- KILLER ANIMATION: split-view сравнение «обычный путь vs наш путь» -->
   <div class="transmission-compare" data-reveal aria-label="Сравнение обычного пути и нашего метода">
@@ -8414,7 +8669,10 @@ body.ex-modal-locked { overflow: hidden; }
     Reveal.init();
     Manifest.init();
     Stages.setup('#s02-manifest', 4, (p) => Manifest.update(p));
-    if (window.innerWidth >= 1024) Stages.setup('#s05-pipeline', 5);
+    if (window.innerWidth >= 1024) {
+      Stages.setup('#s04-transmission', 5);
+      Stages.setup('#s05-pipeline', 5);
+    }
     Peek.init();
     Form.init();
     Progress.init();
